@@ -7,26 +7,20 @@ isZsh=$(command -v zsh)
 isFish=$(command -v fish)
 isSh=$(command -v sh)
 
-if [ -n "$isBash" ]; then
-    echo "Bash detected at $isBash"
-else
-    echo "Bash missing (zsh????)"
-fi
+check_shell() {
+    name="$1"
+    found_msg="$2"
+    missing_msg="$3"
+    path=$(command -v "$4")
 
-if [ -n "$isZsh" ]; then
-    echo "Zsh detected at $isZsh, YAYYYYY"
-else
-    echo "zsh missing (definitely consider installing it)"
-fi
+    if [ -n "$path" ]; then
+        echo "$name detected at $path, $found_msg"
+    else
+        echo "$name missing ($missing_msg)"
+    fi
+}
 
-if [ -n "$isFish" ]; then
-    echo "Fish detected at $isFish, why would you do that to yourselg"
-else
-    echo "Fish missing (not a big woop :/)"
-fi
-
-if [ -n "$isSh" ]; then
-    echo "Shell detected at $isSh, at least thats a backup"
-else
-    echo "Shell missing (yeah thats a problem)"
-fi
+check_shell "Bash" "" "zsh????" "bash"
+check_shell "Zsh" "YAYYYYY" "definitely consider installing it" "zsh"
+check_shell "Fish" "why would you do that to yourself" "not a big woop :/" "fish"
+check_shell "Shell" "at least thats a backup" "yeah thats a problem" "sh"

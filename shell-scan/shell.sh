@@ -15,7 +15,7 @@ case "$SHELL" in
     echo "default is fish"
     DEFAULT="fish"
     ;;
-*shell*)
+*/sh)
     echo "default is shell"
     DEFAULT="sh"
     ;;

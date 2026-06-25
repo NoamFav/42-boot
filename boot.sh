@@ -2,12 +2,11 @@
 
 . ./shell-scan/shell.sh
 . ./vim-loader/vim.sh
-
-echo "$DEFAULT"
+. ./nvim-loader/nvim.sh
 
 echo "Which shell do you want to install config for."
-printf "Choose: [0] zsh [1] bash [2] fish"
-read -r choice_shell </dev/toty
+printf "Choose: [0] zsh [1] bash [2] fish : "
+read -r choice_shell </dev/tty
 case "$choice_shell" in
 0)
     if [ -n "$isZsh" ]; then
@@ -17,7 +16,7 @@ case "$choice_shell" in
         echo "zsh not available, install it boo"
     fi
     if [ "$DEFAULT" != "zsh" ]; then
-        echo "Zsh isnt default, edit \$SHELL"
+        echo "Zsh isnt default, run chsh -s $(command -v zsh) to make it default"
     fi
     ;;
 1)
@@ -37,7 +36,7 @@ case "$choice_shell" in
 esac
 
 echo "Which text editor would you want to install"
-printf "Choose: [0] both [1] nvim only [2] skip : "
+printf "Choose: [0] both [1] nvim only [2] vim only [3] skip : "
 read -r choice </dev/tty
 case "$choice" in
 0)
@@ -46,7 +45,7 @@ case "$choice" in
     . ./vim-loader/install.sh
     ;;
 1)
-    if [ "$NVIM_AVAILABLE" -eq 1]; then
+    if [ "$NVIM_AVAILABLE" -eq 1 ]; then
         echo "nvim only"
         . ./nvim-loader/install.sh
     else
@@ -54,7 +53,7 @@ case "$choice" in
     fi
     ;;
 2)
-    if [ "$VIM_AVAILABLE" -eq 1]; then
+    if [ "$VIM_AVAILABLE" -eq 1 ]; then
         echo "vim only"
         . ./vim-loader/install.sh
     else
