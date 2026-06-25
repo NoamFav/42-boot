@@ -14,19 +14,19 @@ else
 fi
 
 if [ -n "$isZsh" ]; then
-    echo "Zsh detected at $isZsh"
+    echo "Zsh detected at $isZsh, YAYYYYY"
 else
     echo "zsh missing (definitely consider installing it)"
 fi
 
 if [ -n "$isFish" ]; then
-    echo "Fish detected at $isFish"
+    echo "Fish detected at $isFish, why would you do that to yourselg"
 else
     echo "Fish missing (not a big woop :/)"
 fi
 
 if [ -n "$isSh" ]; then
-    echo "Shell detected at $isSh"
+    echo "Shell detected at $isSh, at least thats a backup"
 else
     echo "Shell missing (yeah thats a problem)"
 fi
