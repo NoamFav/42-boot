@@ -11,7 +11,6 @@ ZSH_DIR="$HOME/.config/zsh"
 . ./clone.sh
 . ./nvim-loader/alias.sh
 . ./vim-loader/install.sh
-. ./vim-loader/vim.sh
 . ./shell-scan/shell.sh
 
 shell
