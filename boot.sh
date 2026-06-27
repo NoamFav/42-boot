@@ -1,17 +1,30 @@
 #!/bin/sh
 
-. ./shell-scan/shell.sh
+has() { command -v "$1" >/dev/null 2>&1; }
+
+REPO_BASE="https://raw.githubusercontent.com/NoamFav/42-boot/main"
+NVIM_REPO="https://github.com/NoamFav/nvim-config.git"
+ZSH_REPO="https://github.com/NoamFav/zsh.git"
+NVIM_DIR="$HOME/.config/nvim"
+ZSH_DIR="$HOME/.config/zsh"
+
+. ./clone.sh
+. ./nvim-loader/alias.sh
+. ./vim-loader/install.sh
 . ./vim-loader/vim.sh
-. ./nvim-loader/nvim.sh
+. ./shell-scan/shell.sh
+
+shell
 
 echo "Which shell do you want to install config for."
 printf "Choose: [0] zsh [1] bash [2] fish : "
 read -r choice_shell </dev/tty
 case "$choice_shell" in
 0)
-    if [ -n "$isZsh" ]; then
+    if has zsh; then
         echo "installing .zshrc"
-        . ./shell-scan/zsh-install.sh
+        install_config "$ZSH_REPO" "$ZSH_DIR" "42-cluster" # clone/pull the modules
+        ln -sf "$ZSH_DIR/.zshrc" "$HOME/.zshrc"
     else
         echo "zsh not available, install it boo"
     fi
@@ -20,14 +33,14 @@ case "$choice_shell" in
     fi
     ;;
 1)
-    if [ -n "$isBash" ]; then
+    if has bash; then
         echo "installing .bashrc"
-        . ./shell-scan/bash-install.sh
+        # install bash
     else
         echo "bash not available, sorry"
     fi
     if [ "$DEFAULT" != "bash" ]; then
-        echo "Bash isnt default, edit \$SHELL"
+        echo "Bash isnt default, run chsh -s $(command -v bash) to make it default"
     fi
     ;;
 2)
@@ -40,22 +53,19 @@ printf "Choose: [0] both [1] nvim only [2] vim only [3] skip : "
 read -r choice </dev/tty
 case "$choice" in
 0)
-    echo "both"
-    . ./nvim-loader/install.sh
-    . ./vim-loader/install.sh
+    has vim && install_vim || echo "vim missing, skipping"
+    has nvim && install_config "$NVIM_REPO" "$NVIM_DIR" || echo "nvim missing, skipping"
     ;;
 1)
-    if [ "$NVIM_AVAILABLE" -eq 1 ]; then
-        echo "nvim only"
-        . ./nvim-loader/install.sh
+    if has nvim; then
+        install_config "$NVIM_REPO" "$NVIM_DIR"
     else
         echo "nvim unavailable"
     fi
     ;;
 2)
-    if [ "$VIM_AVAILABLE" -eq 1 ]; then
-        echo "vim only"
-        . ./vim-loader/install.sh
+    if has vim; then
+        install_vim
     else
         echo "vim unavailable"
     fi
