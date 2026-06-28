@@ -13,7 +13,13 @@ Installs are **idempotent and safe**: existing configs are detected and updated 
 
 ## Usage
 
-Clone and run:
+Quickest — one-liner, no clone (runs the bundled `install.sh`):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/NoamFav/42-boot/main/install.sh | sh
+```
+
+Or clone and run the modular entry point:
 
 ```sh
 git clone https://github.com/NoamFav/42-boot.git
@@ -21,7 +27,9 @@ cd 42-boot
 sh boot.sh
 ```
 
-The script is interactive — it reads your choices from the terminal as it goes.
+The script is interactive — it reads your choices from `/dev/tty` as it goes, so the prompts work even when piped from `curl`.
+
+> `install.sh` is generated from the modules by `sh build.sh` — edit the modules, not the bundle. The plain `curl … | boot.sh` form does **not** work, because `boot.sh` sources its sibling files relatively; use the bundled `install.sh` (above) or clone the repo.
 
 ## How it works
 
