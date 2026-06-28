@@ -1,74 +1,79 @@
 #!/bin/sh
 
-has() { command -v "$1" >/dev/null 2>&1; }
+. ./config.sh
 
-REPO_BASE="https://raw.githubusercontent.com/NoamFav/42-boot/main"
-NVIM_REPO="https://github.com/NoamFav/nvim-config.git"
-ZSH_REPO="https://github.com/NoamFav/zsh.git"
-NVIM_DIR="$HOME/.config/nvim"
-ZSH_DIR="$HOME/.config/zsh"
+banner
+info "host:    ${C_BOLD}${DISTRO}${C_RESET}"
+info "shell:   ${C_BOLD}${DEFAULT}${C_RESET}"
+info "pkg-mgr: ${C_BOLD}${PM}${C_RESET}"
+echo
 
-. ./clone.sh
-. ./nvim-loader/alias.sh
-. ./vim-loader/install.sh
-. ./shell-scan/shell.sh
+choose choice_shell "Which shell config do you want?" 0 \
+    "zsh   — NoamFav/zsh (42-cluster branch), symlinked to ~/.zshrc" \
+    "bash  — standalone .bashrc" \
+    "fish  — not provided"
 
-shell
-
-echo "Which shell do you want to install config for."
-printf "Choose: [0] zsh [1] bash [2] fish : "
-read -r choice_shell </dev/tty
 case "$choice_shell" in
 0)
-    if has zsh; then
-        echo "installing .zshrc"
-        install_config "$ZSH_REPO" "$ZSH_DIR" "42-cluster" # clone/pull the modules
-        ln -sf "$ZSH_DIR/.zshrc" "$HOME/.zshrc"
-    else
-        echo "zsh not available, install it boo"
-    fi
-    if [ "$DEFAULT" != "zsh" ]; then
-        echo "Zsh isnt default, run chsh -s $(command -v zsh) to make it default"
+    if ensure_tool zsh; then
+        info "installing zsh config…"
+        if install_config "$ZSH_REPO" "$ZSH_DIR" "42-cluster"; then
+            ln -sf "$ZSH_DIR/.zshrc" "$HOME/.zshrc"
+            ok "zsh config linked to ~/.zshrc"
+            [ "$DEFAULT" != "zsh" ] &&
+                warn "zsh isn't your login shell — run: ${C_BOLD}chsh -s $(command -v zsh)${C_RESET}"
+        else
+            err "zsh config install failed — left ~/.zshrc untouched"
+        fi
     fi
     ;;
 1)
-    if has bash; then
-        echo "installing .bashrc"
-        # install bash
-    else
-        echo "bash not available, sorry"
-    fi
-    if [ "$DEFAULT" != "bash" ]; then
-        echo "Bash isnt default, run chsh -s $(command -v bash) to make it default"
+    if ensure_tool bash; then
+        info "installing bash config…"
+        install_bashrc
+        [ "$DEFAULT" != "bash" ] &&
+            warn "bash isn't your login shell — run: ${C_BOLD}chsh -s $(command -v bash)${C_RESET}"
     fi
     ;;
 2)
-    echo "I refuse to install fishrc, out of pride and you should see a therapist"
+    warn "no fish config provided — skipping."
     ;;
 esac
 
-echo "Which text editor would you want to install"
-printf "Choose: [0] both [1] nvim only [2] vim only [3] skip : "
-read -r choice </dev/tty
-case "$choice" in
-0)
-    has vim && install_vim || echo "vim missing, skipping"
-    has nvim && install_config "$NVIM_REPO" "$NVIM_DIR" || echo "nvim missing, skipping"
-    ;;
-1)
-    if has nvim; then
-        install_config "$NVIM_REPO" "$NVIM_DIR"
-    else
-        echo "nvim unavailable"
+echo
+
+# --------------------------------------------------------------- editor config
+choose choice_editor "Which editor config do you want?" 1 \
+    "both  — nvim + vim" \
+    "nvim  — NoamFav/nvim-config" \
+    "vim   — standalone .vimrc" \
+    "skip"
+
+install_nvim() {
+    if ensure_tool nvim neovim; then
+        info "installing nvim config…"
+        install_config "$NVIM_REPO" "$NVIM_DIR" && ok "nvim config installed"
+        nvim_alias # set up a Flatpak alias if needed (see nvim-loader/alias.sh)
     fi
-    ;;
-2)
-    if has vim; then
+}
+
+install_vim_cfg() {
+    if ensure_tool vim; then
+        info "installing vim config…"
         install_vim
-    else
-        echo "vim unavailable"
     fi
+}
+
+case "$choice_editor" in
+0)
+    install_vim_cfg
+    install_nvim
     ;;
-3) echo "skip" ;;
-*) echo "invalid, defaulting to skip" ;;
+1) install_nvim ;;
+2) install_vim_cfg ;;
+3) info "skipping editor config" ;;
+*) info "skipping editor config" ;;
 esac
+
+echo
+ok "${C_BOLD}all done.${C_RESET}"
